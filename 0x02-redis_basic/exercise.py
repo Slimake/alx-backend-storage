@@ -26,15 +26,17 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable]) -> Any:
+    def get(self, key: str, fn: Optional[Callable] = None) -> Any:
         """
         Create a get method that take a key string argument and an optional
         Callable argument named fn. This callable will be used to convert
         the data back to the desired format.
         """
         value = self._redis.get(key)
-        if (fn):
-            value = fn(value)
+        if value is None:
+            return None
+        if fn:
+            return fn(value)
         return value
 
     def get_str(self, key: str) -> Optional[str]:
