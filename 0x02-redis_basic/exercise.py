@@ -13,6 +13,7 @@ def count_calls(method: Callable) -> Callable:
     """
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        """A wrapper method"""
         key = self.__class__.__qualname__ + '.' + method.__name__
         self._redis.incr(key)  # Increment the call count in Redis
         return method(self, *args, **kwargs)  # Call the original method
