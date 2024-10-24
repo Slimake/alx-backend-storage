@@ -3,6 +3,22 @@
 import redis
 from typing import Union, Optional, Callable, Any
 from uuid import uuid4
+from functools import wraps
+
+r = redis.Redis()
+
+
+def count_calls(func: Callable) -> Callable:
+    """
+    A decorator that counts the number of times a function is called and stores the count in Redis.
+    """
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        key = self.__class__.__qualname__ + '.' + func.__name__  # Create a unique key
+        r.incr(key)  # Increment the call count in Redis
+        return func(self, *args, **kwargs)  # Call the original method
+
+    return wrapper
 
 
 class Cache:
@@ -17,6 +33,7 @@ class Cache:
         self._redis = redis.Redis()  # Create an instance of Redis class
         self._redis.flushdb()  # Flush database: clear old entries
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         The method should generate a random key (e.g. using uuid),
