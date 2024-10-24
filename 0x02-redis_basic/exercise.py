@@ -5,8 +5,6 @@ from typing import Union, Optional, Callable, Any
 from uuid import uuid4
 from functools import wraps
 
-r = redis.Redis()
-
 
 def count_calls(method: Callable) -> Callable:
     """
@@ -16,7 +14,7 @@ def count_calls(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         key = self.__class__.__qualname__ + '.' + method.__name__
-        r.incr(key)  # Increment the call count in Redis
+        self._redis.incr(key)  # Increment the call count in Redis
         return method(self, *args, **kwargs)  # Call the original method
 
     return wrapper
