@@ -6,6 +6,33 @@ from uuid import uuid4
 from functools import wraps
 
 
+def call_history(method: Callable) -> Callable:
+    """
+    A decorator that stores the history of inputs and outputs
+    for a particular function in Redis.
+    """
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        # Create keys for storing inputs and outputs
+        inputs_key = \
+            f"{self.__class__.__qualname__}.{method.__name__}:inputs"
+        outputs_key = \
+            f"{self.__class__.__qualname__}.{method.__name__}:outputs"
+
+        # Store the input parameters in Redis
+        self._redis.rpush(inputs_key, str(args))  # Normalize to string
+
+        # Call the original method to get the output
+        output = method(self, *args, **kwargs)
+
+        # Store the output in Redis
+        self._redis.rpush(outputs_key, str(output))
+
+        return output
+
+    return wrapper
+
+
 def count_calls(method: Callable) -> Callable:
     """
     A decorator that counts the number of times a
@@ -34,6 +61,7 @@ class Cache:
         self._redis.flushdb()  # Flush database: clear old entries
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         The method should generate a random key (e.g. using uuid),
