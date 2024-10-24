@@ -8,16 +8,16 @@ from functools import wraps
 r = redis.Redis()
 
 
-def count_calls(func: Callable) -> Callable:
+def count_calls(method: Callable) -> Callable:
     """
     A decorator that counts the number of times a
-    function is called and stores the count in Redis.
+    methodtion is called and stores the count in Redis.
     """
-    @wraps(func)
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
-        key = self.__class__.__qualname__ + '.' + func.__name__
+        key = self.__class__.__qualname__ + '.' + method.__name__
         r.incr(key)  # Increment the call count in Redis
-        return func(self, *args, **kwargs)  # Call the original method
+        return method(self, *args, **kwargs)  # Call the original method
 
     return wrapper
 
