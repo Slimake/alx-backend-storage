@@ -10,11 +10,12 @@ r = redis.Redis()
 
 def count_calls(func: Callable) -> Callable:
     """
-    A decorator that counts the number of times a function is called and stores the count in Redis.
+    A decorator that counts the number of times a
+    function is called and stores the count in Redis.
     """
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        key = self.__class__.__qualname__ + '.' + func.__name__  # Create a unique key
+        key = self.__class__.__qualname__ + '.' + func.__name__
         r.incr(key)  # Increment the call count in Redis
         return func(self, *args, **kwargs)  # Call the original method
 
