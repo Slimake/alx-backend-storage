@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exercise Module"""
 import redis
-from typing import Union
+from typing import Union, Optional, Callable, Any
 from uuid import uuid4
 
 
@@ -25,3 +25,22 @@ class Cache:
         key = str(uuid4())
         self._redis.set(key, data)
         return key
+
+    def get(self, key: str, fn: Optional[Callable]) -> Any:
+        """
+        Create a get method that take a key string argument and an optional
+        Callable argument named fn. This callable will be used to convert
+        the data back to the desired format.
+        """
+        value = self._redis.get(key)
+        if (fn):
+            value = fn(value)
+        return value
+
+    def get_str(self, key: str) -> Optional[str]:
+        """Return str conversion"""
+        return self.get(key, lambda x: x.decode('utf-8'))
+
+    def get_int(self, key: str) -> Optional[int]:
+        """Return int conversion"""
+        return self.get(key, int)
